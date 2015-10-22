@@ -1,0 +1,8 @@
+---
+
+docker_openvpn_source_base_dir: '/home/user/sec/vpn_access'
+docker_openvpn_target_base_dir: '/etc/openvpn'
+
+docker_openvpn_users_list:
+docker_openvpn_users_group_list:
+docker_openvpn_users_host_list:

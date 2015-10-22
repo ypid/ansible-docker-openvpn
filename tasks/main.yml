@@ -1,0 +1,39 @@
+---
+
+- name: Testing if target exists
+  local_action: stat path={{ docker_openvpn_source_base_dir }}
+  sudo: no
+  register: p
+
+- name: Halt if directory does not exist
+  fail:
+    msg: "Target directory does not exist."
+  when: p.stat.isdir is not defined or not p.stat.isdir
+
+- name: Copy over the openvpn configuration
+  synchronize:
+    src: '{{ docker_openvpn_source_base_dir }}/{{ item }}/server/'
+    dest: '{{ docker_openvpn_target_base_dir }}/{{ item }}'
+    # owner: 'root'
+    # group: 'root'
+    recursive: yes
+    links: yes
+    perms: yes
+    copy_links: yes
+    delete: yes
+  with_flattened:
+    - docker_openvpn_users_list
+    - docker_openvpn_users_group_list
+    - docker_openvpn_users_host_list
+  when: item is defined and item != ""
+
+- name: Create link to the OpenVPN configuration for auto startup if not running in a container
+  file:
+    src: '{{ docker_openvpn_target_base_dir }}/{{ item }}/openvpn.conf'
+    dest: '{{ docker_openvpn_target_base_dir }}/{{ item }}.conf'
+    state: 'link'
+  with_flattened:
+    - docker_openvpn_users_list
+    - docker_openvpn_users_group_list
+    - docker_openvpn_users_host_list
+  when: item is defined and item != ""
